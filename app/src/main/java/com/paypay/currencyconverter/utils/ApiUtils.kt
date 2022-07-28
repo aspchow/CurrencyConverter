@@ -2,7 +2,7 @@ package com.paypay.currencyconverter.utils
 
 import retrofit2.Response
 
-fun <T> Response<T>.handle(onSuccess: (T) -> Unit, onFailure: (String) -> Unit) {
+suspend fun <T> Response<T>.handle(onSuccess: suspend (T) -> Unit, onFailure: suspend (String) -> Unit) {
     if (isSuccessful) {
         onSuccess(body()!!)
     } else {
