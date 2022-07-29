@@ -4,12 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,26 +32,42 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
-
-            LaunchedEffect(key1 = Unit, block = {
-                viewModel.getCurrencyRateFromServer().collect { result ->
-
-                }
-            })
-
-            val rate: Rate by viewModel.getCurrencyRate().collectAsState(initial = Rate())
-
             CurrencyConverterTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background
                 ) {
-                    LazyColumn(content = {
-                        items(Currency.values()) { currency ->
-                            Text(text = currency.name + " " + rate.getRateFor(currency))
+
+                    LaunchedEffect(key1 = Unit, block = {
+                        viewModel.getCurrencyRateFromServer().collect { result ->
+
                         }
                     })
+
+                    val rate: Rate by viewModel.getCurrencyRate().collectAsState(initial = Rate())
+
+
+                    val selectedCurrency by viewModel.selectedCurrency.collectAsState(initial = Currency.USD)
+
+                    var price by remember {
+                        mutableStateOf(1.0)
+                    }
+
+
+                    Column {
+                        TextField(value = price.toString(), onValueChange = {
+                            price = it.toDouble()
+                        })
+
+                        LazyColumn(content = {
+                            items(Currency.values()) { currency ->
+                                Text(
+                                    text = currency.name + " " + (rate.getRateFor(currency) / rate.getRateFor(
+                                        selectedCurrency
+                                    )) * price
+                                )
+                            }
+                        })
+                    }
                 }
             }
         }

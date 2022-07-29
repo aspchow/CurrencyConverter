@@ -1,7 +1,9 @@
 package com.paypay.currencyconverter.repository
 
 import com.paypay.currencyconverter.utils.handle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -11,7 +13,7 @@ class Repository @Inject constructor(
     private val remoteDataSource: RemoteDataSource
 ) {
 
-    fun getRate() = localDataSource.getRate()
+    fun getRate() = localDataSource.getRate().flowOn(Dispatchers.IO)
 
     fun getCurrencyRateFromServer() = flow<Result<Unit>> {
         val result = remoteDataSource.getCurrencyRate()
