@@ -2,6 +2,7 @@ package com.paypay.currencyconverter.repository
 
 import com.paypay.currencyconverter.utils.handle
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
@@ -26,5 +27,7 @@ class Repository @Inject constructor(
                 emit(Result.failure(Exception("something went wrong please try again")))
             }
         )
+    }.catch {
+        emit(Result.failure(Exception("something went wrong please try again")))
     }
 }
