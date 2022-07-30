@@ -1,10 +1,9 @@
-package com.paypay.currencyconverter
+package com.paypay.currencyconverter.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.paypay.currencyconverter.repository.Currency
+import com.paypay.currencyconverter.repository.model.Currency
 import com.paypay.currencyconverter.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 

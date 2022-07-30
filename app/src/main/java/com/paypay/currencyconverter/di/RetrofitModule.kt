@@ -1,6 +1,7 @@
 package com.paypay.currencyconverter.di
 
-import com.paypay.currencyconverter.repository.CurrencyService
+import com.google.gson.Gson
+import com.paypay.currencyconverter.repository.remote.CurrencyService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,15 +19,15 @@ object RetrofitModule {
     private const val baseUrl = "https://openexchangerates.org"
 
     @Provides
-    fun provideInterceptor() : HttpLoggingInterceptor{
+    fun provideInterceptor(): HttpLoggingInterceptor {
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BODY
-       return interceptor
+        return interceptor
     }
 
     @Provides
-    fun provideClient(interceptor : HttpLoggingInterceptor) : OkHttpClient{
-      return OkHttpClient.Builder().addInterceptor(interceptor).build()
+    fun provideClient(interceptor: HttpLoggingInterceptor): OkHttpClient {
+        return OkHttpClient.Builder().addInterceptor(interceptor).build()
     }
 
     @Provides
@@ -40,5 +41,10 @@ object RetrofitModule {
     @Provides
     fun provideCurrencyService(retrofit: Retrofit): CurrencyService {
         return retrofit.create(CurrencyService::class.java)
+    }
+
+    @Provides
+    fun providesGson(): Gson {
+        return Gson()
     }
 }

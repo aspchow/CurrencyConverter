@@ -1,4 +1,4 @@
-package com.paypay.currencyconverter.repository
+package com.paypay.currencyconverter.repository.model
 
 enum class Currency {
     AED,

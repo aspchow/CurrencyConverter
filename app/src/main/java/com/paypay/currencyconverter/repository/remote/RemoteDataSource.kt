@@ -1,4 +1,4 @@
-package com.paypay.currencyconverter.repository
+package com.paypay.currencyconverter.repository.remote
 
 import javax.inject.Inject
 import javax.inject.Singleton

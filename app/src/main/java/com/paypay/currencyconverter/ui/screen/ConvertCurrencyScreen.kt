@@ -1,5 +1,6 @@
 package com.paypay.currencyconverter.ui.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
@@ -17,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -25,20 +27,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.paypay.currencyconverter.CurrencyConverterViewModel
+import com.paypay.currencyconverter.viewmodel.CurrencyConverterViewModel
 import com.paypay.currencyconverter.R
-import com.paypay.currencyconverter.repository.Currency
-import com.paypay.currencyconverter.repository.Rate
+import com.paypay.currencyconverter.repository.model.Currency
+import com.paypay.currencyconverter.repository.model.Rate
 import com.paypay.currencyconverter.ui.theme.*
+import com.paypay.currencyconverter.utils.roundOff
+import com.paypay.currencyconverter.utils.safeDouble
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.withContext
 
 
 @Composable
-fun ConvertCurrencyScreen(navController: NavController) {
+fun ConvertCurrencyScreen(
+    navController: NavController,
+    viewModel: CurrencyConverterViewModel
+) {
 
-    val viewModel = hiltViewModel<CurrencyConverterViewModel>()
+
+    val context = LocalContext.current
 
     LaunchedEffect(key1 = Unit, block = {
         viewModel.getCurrencyRateFromServer().collect { result ->
@@ -52,37 +61,8 @@ fun ConvertCurrencyScreen(navController: NavController) {
     val searchedCurrency by viewModel.searchedCurrency.collectAsState()
 
     var price by remember {
-        mutableStateOf(0.0)
+        mutableStateOf("")
     }
-
-    CurrencyConverter(
-        selectedCurrency = selectedCurrency, priceValue = price,
-        onPriceChange = {
-            price = it
-        },
-        availableCurrencies = availableCurrencies,
-        rate = rate,
-        searchText = searchedCurrency,
-        onSearch = { query ->
-            viewModel.search(query = query)
-        },
-        onCurrencyChangeRequest = {
-            navController.navigate(Screen.SELECT_CURRENCY)
-        }
-    )
-}
-
-@Composable
-fun CurrencyConverter(
-    selectedCurrency: Currency,
-    priceValue: Double,
-    onPriceChange: (Double) -> Unit,
-    availableCurrencies: List<Currency>,
-    rate: Rate,
-    searchText: String,
-    onSearch: (String) -> Unit,
-    onCurrencyChangeRequest: () -> Unit,
-) {
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -90,18 +70,23 @@ fun CurrencyConverter(
 
         CurrencyConverterView(
             selectedCurrency = selectedCurrency,
-            priceValue = priceValue,
-            onPriceChange = onPriceChange,
+            priceValue = price,
+            onPriceChange = {
+                price = it
+            },
             currencies = availableCurrencies,
             rate = rate,
-            searchText = searchText,
-            onSearch = onSearch,
-            onCurrencyChangeRequest = onCurrencyChangeRequest
-        )
+            searchText = searchedCurrency,
+            onSearch = { query ->
+                viewModel.search(query = query)
+            }
+        ) {
+            navController.navigate(Screen.SELECT_CURRENCY)
+        }
 
     }
-
 }
+
 
 @Preview
 @Composable
@@ -112,7 +97,7 @@ fun CurrencyConverterPreview() {
         CurrencyConverterBackGround()
 
         CurrencyConverterView(
-            Currency.INR, 100.0,
+            Currency.INR, "",
             {
 
             },
@@ -121,11 +106,10 @@ fun CurrencyConverterPreview() {
             "",
             {
 
-            },
-            {
-
             }
-        )
+        ) {
+
+        }
 
     }
 
@@ -135,8 +119,8 @@ fun CurrencyConverterPreview() {
 @Composable
 private fun CurrencyConverterView(
     selectedCurrency: Currency,
-    priceValue: Double,
-    onPriceChange: (Double) -> Unit,
+    priceValue: String,
+    onPriceChange: (String) -> Unit,
     currencies: List<Currency>,
     rate: Rate,
     searchText: String,
@@ -157,7 +141,7 @@ private fun CurrencyConverterView(
             selectedCurrency = selectedCurrency,
             priceValue = priceValue,
             onPriceChange = onPriceChange,
-            onCurrecyChangeRequest = onCurrencyChangeRequest
+            onCurrencyChangeRequest = onCurrencyChangeRequest
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -179,17 +163,18 @@ fun CurrencyConversionSection(
     currencies: List<Currency>,
     rate: Rate,
     selectedCurrency: Currency,
-    price: Double,
+    price: String,
     searchText: String,
     onSearch: (String) -> Unit
 ) {
 
     Column(
-        Modifier
-            .fillMaxWidth()
+        Modifier.fillMaxWidth()
     ) {
 
         SearchBox(searchText = searchText, onSearch = onSearch)
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         LazyVerticalGrid(
             modifier = Modifier
@@ -226,20 +211,20 @@ fun CurrencyConversionSection(
 
                                 Text(
                                     text = " (rate :- 1 ${selectedCurrency.name} = ${
-                                        rate.getRateFor(currency) / rate.getRateFor(
+                                        (rate.getRateFor(currency) / rate.getRateFor(
                                             selectedCurrency
-                                        )
+                                        )).roundOff()
                                     } ${currency.name} )",
                                     style = fontRegular.copy(
                                         color = textColor,
-                                        fontSize = 9.sp,
+                                        fontSize = 10.sp,
                                     )
                                 )
 
                                 Text(
                                     text = ((rate.getRateFor(currency) / rate.getRateFor(
                                         selectedCurrency
-                                    )) * price).toString(),
+                                    )) * price.safeDouble()).roundOff().toString(),
                                     style = fontRegular.copy(
                                         color = textColor,
                                         fontSize = 13.sp,
@@ -259,9 +244,9 @@ fun CurrencyConversionSection(
 @Composable
 private fun SelectedCurrency(
     selectedCurrency: Currency,
-    priceValue: Double,
-    onPriceChange: (Double) -> Unit,
-    onCurrecyChangeRequest: () -> Unit
+    priceValue: String,
+    onPriceChange: (String) -> Unit,
+    onCurrencyChangeRequest: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -307,17 +292,17 @@ private fun SelectedCurrency(
                             isTextFocused = it.isFocused
                         },
                     value = priceValue.toString(),
-                    onValueChange = {
-                        onPriceChange(
-                            if (it.isEmpty()) {
-                                it.toDouble()
+                    onValueChange = { price ->
+                        try {
+                            if (price.isEmpty()) {
+                                onPriceChange("")
                             } else {
-                                when (it.toDoubleOrNull()) {
-                                    null -> priceValue
-                                    else -> it.toDouble()
-                                }
+                                price.toFloat()
+                                onPriceChange(price)
                             }
-                        )
+                        } catch (_: Exception) {
+
+                        }
                     },
                     textStyle = fontRegular.copy(
                         fontSize = 16.sp, fontWeight = FontWeight.W600, color = textColor
@@ -333,7 +318,7 @@ private fun SelectedCurrency(
                 Modifier
                     .fillMaxWidth()
                     .clickable {
-                        onCurrecyChangeRequest()
+                        onCurrencyChangeRequest()
                     },
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
@@ -359,10 +344,10 @@ private fun SelectedCurrency(
     }
 }
 
+@Preview
 @Composable
 private fun HeaderSection() {
     Spacer(modifier = Modifier.height(32.dp))
-
     Text(
         modifier = Modifier.padding(start = 20.dp),
         text = "Currency Converter",
@@ -401,50 +386,5 @@ fun CurrencyConverterBackGround() {
                     )
                 )
         )
-    }
-}
-
-
-@Composable
-fun SearchBox(searchText: String, onSearch: (String) -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = 10.dp,
-        shape = RoundedCornerShape(8.dp)
-    ) {
-
-        var isOnFocus by remember {
-            mutableStateOf(false)
-        }
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-
-            Image(
-                modifier = Modifier.size(14.dp),
-                painter = painterResource(id = R.drawable.search_currency),
-                contentDescription = null
-            )
-
-            BasicTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp)
-                    .onFocusEvent {
-                        isOnFocus = it.isFocused
-                    },
-                value = if (searchText.isEmpty() && isOnFocus.not()) "Search Currency" else searchText,
-                onValueChange = onSearch,
-                textStyle = fontRegular.copy(
-                    fontSize = 14.sp,
-                    color = textColor,
-                    fontWeight = if (searchText.isEmpty() && isOnFocus.not()) FontWeight.Normal else FontWeight.Bold
-                )
-            )
-        }
     }
 }
