@@ -25,6 +25,15 @@ android {
 
     buildTypes {
         release {
+
+            buildConfigField "String", "API_KEY", '"d174b30ba60740d4a5beb8c09de1f701"'
+
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        debug {
+            buildConfigField "String", "API_KEY", '"d174b30ba60740d4a5beb8c09de1f701"'
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -54,22 +63,30 @@ dependencies {
      // retrofit
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
 
+    // Interceptor
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.1'
+
+    // GSON
+    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
 
     //datastore
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 
-
-    // GSON
-    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
     // coroutine
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2"
 
 
+    //Hilt dependencies
     implementation "com.google.dagger:hilt-android:2.38.1"
     kapt "com.google.dagger:hilt-compiler:2.38.1"
     implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
+
+    //mockk
+    testImplementation "io.mockk:mockk:1.12.5"
+    androidTestImplementation "io.mockk:mockk-android:1.12.5"
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4'
+
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'

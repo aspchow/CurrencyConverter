@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.paypay.currencyconverter.repository.model.Currency
 import com.paypay.currencyconverter.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
@@ -37,7 +38,7 @@ class CurrencyConverterViewModel @Inject constructor(private val repository: Rep
 
     fun getCurrencyRate() = repository.getRate()
 
-    fun getCurrencyRateFromServer() = repository.getCurrencyRateFromServer()
+    fun getCurrencyRateFromServer() = repository.getCurrencyRateFromServer().flowOn(Dispatchers.IO)
 
     fun setTheCurrency(currency: Currency) {
         _selectedCurrency.value = currency

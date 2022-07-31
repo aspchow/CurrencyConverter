@@ -6,7 +6,11 @@ import javax.inject.Singleton
 @Singleton
 class ApiRefreshChecker @Inject constructor() {
 
+    companion object {
+        const val API_CACHE_MILLISECONDS = 30 * 60 * 1000
+    }
+
     fun checkIfTimePassed(rateLmt: Long): Boolean {
-        return System.currentTimeMillis() >= rateLmt + 30 * 60 * 1000
+        return System.currentTimeMillis() >= rateLmt + API_CACHE_MILLISECONDS
     }
 }

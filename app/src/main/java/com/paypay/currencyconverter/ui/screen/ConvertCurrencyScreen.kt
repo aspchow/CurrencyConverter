@@ -28,16 +28,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.paypay.currencyconverter.viewmodel.CurrencyConverterViewModel
 import com.paypay.currencyconverter.R
 import com.paypay.currencyconverter.repository.model.Currency
 import com.paypay.currencyconverter.repository.model.Rate
 import com.paypay.currencyconverter.ui.theme.*
 import com.paypay.currencyconverter.utils.roundOff
 import com.paypay.currencyconverter.utils.safeDouble
-import kotlinx.coroutines.Dispatchers
+import com.paypay.currencyconverter.viewmodel.CurrencyConverterViewModel
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.withContext
 
 
 @Composable
@@ -50,8 +48,16 @@ fun ConvertCurrencyScreen(
     val context = LocalContext.current
 
     LaunchedEffect(key1 = Unit, block = {
+        navController.navigate(Screen.NETWORK_LOADER)
         viewModel.getCurrencyRateFromServer().collect { result ->
-
+            navController.popBackStack()
+            if (result.isFailure) {
+                Toast.makeText(
+                    context,
+                    "Something went wrong, Please check your internet",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     })
 
@@ -282,8 +288,8 @@ private fun SelectedCurrency(
                 BasicTextField(
                     modifier = Modifier
                         .border(
-                            1.dp,
-                            if (isTextFocused) primaryColor else secondaryColor,
+                            2.dp,
+                            if (isTextFocused) primaryColor else primaryColor.copy(alpha = 0.3f),
                             RoundedCornerShape(16.dp)
                         )
                         .fillMaxWidth()
@@ -374,14 +380,14 @@ fun CurrencyConverterBackGround() {
                     RoundedCornerShape(
                         topStartPercent = 0,
                         topEndPercent = 0,
-                        bottomEndPercent = 30,
-                        bottomStartPercent = 30
+                        bottomEndPercent = 20,
+                        bottomStartPercent = 20
                     )
                 )
                 .background(
-                    brush = Brush.linearGradient(
+                    brush = Brush.verticalGradient(
                         colors = listOf(
-                            primaryColor, primaryColor.copy(alpha = 0.5f)
+                            primaryColor, primaryColor.copy(alpha = 0.3f)
                         )
                     )
                 )

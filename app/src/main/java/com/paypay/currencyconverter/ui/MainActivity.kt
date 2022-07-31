@@ -15,6 +15,7 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import com.paypay.currencyconverter.viewmodel.CurrencyConverterViewModel
 import com.paypay.currencyconverter.ui.screen.ConvertCurrencyScreen
+import com.paypay.currencyconverter.ui.screen.NetworkLoader
 import com.paypay.currencyconverter.ui.screen.Screen
 import com.paypay.currencyconverter.ui.screen.SelectCurrency
 import com.paypay.currencyconverter.ui.theme.CurrencyConverterTheme
@@ -50,6 +51,16 @@ class MainActivity : ComponentActivity() {
                             dialogProperties = DialogProperties(dismissOnClickOutside = false)
                         ) {
                             SelectCurrency(navController = navController, viewModel)
+                        }
+
+                        dialog(
+                            route = Screen.NETWORK_LOADER,
+                            dialogProperties = DialogProperties(
+                                dismissOnClickOutside = false,
+                                dismissOnBackPress = false
+                            )
+                        ) {
+                            NetworkLoader()
                         }
 
                     }
