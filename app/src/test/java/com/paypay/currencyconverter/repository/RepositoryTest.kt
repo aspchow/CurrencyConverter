@@ -36,7 +36,6 @@ class RepositoryTest {
     @Before
     fun setUp() {
         clearAllMocks()
-        unmockkAll()
     }
 
 

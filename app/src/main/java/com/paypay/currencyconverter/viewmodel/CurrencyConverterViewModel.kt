@@ -20,25 +20,24 @@ class CurrencyConverterViewModel @Inject constructor(private val repository: Rep
 
     val searchedCurrency: StateFlow<String> = _searchedCurrency
 
+    fun getCurrencyRate() = repository.getRate()
+
+    fun getCurrencyRateFromServer() = repository.getCurrencyRateFromServer().flowOn(Dispatchers.IO)
 
     val availableCurrencies: Flow<List<Currency>> = _searchedCurrency.flatMapLatest { search ->
-        _selectedCurrency.map { selectedCurrecy ->
+        _selectedCurrency.map { selectedCurrency ->
             if (search.isEmpty()) {
                 Currency.values().filter { currency ->
-                    currency != selectedCurrecy
+                    currency != selectedCurrency
                 }
             } else {
                 Currency.values().filter { currency ->
-                    currency.name.contains(search, ignoreCase = true) && currency != selectedCurrecy
+                    currency.name.contains(search, ignoreCase = true) && currency != selectedCurrency
                 }
             }
         }
     }
 
-
-    fun getCurrencyRate() = repository.getRate()
-
-    fun getCurrencyRateFromServer() = repository.getCurrencyRateFromServer().flowOn(Dispatchers.IO)
 
     fun setTheCurrency(currency: Currency) {
         _selectedCurrency.value = currency

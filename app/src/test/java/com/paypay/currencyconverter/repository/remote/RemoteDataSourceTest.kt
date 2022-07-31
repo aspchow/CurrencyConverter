@@ -22,7 +22,6 @@ class RemoteDataSourceTest {
     @Before
     fun setUp() {
         clearAllMocks()
-        unmockkAll()
     }
 
     @Test
