@@ -61,7 +61,7 @@ fun ConvertCurrencyScreen(
         }
     })
 
-    val rate: Rate by viewModel.getCurrencyRate().collectAsState(initial = Rate())
+    val rate: Rate by viewModel.getCurrencyRate().collectAsState(initial = Rate.defaultRate())
     val selectedCurrency by viewModel.selectedCurrency.collectAsState()
     val availableCurrencies by viewModel.availableCurrencies.collectAsState(initial = emptyList())
     val searchedCurrency by viewModel.searchedCurrency.collectAsState()
@@ -108,7 +108,7 @@ fun CurrencyConverterPreview() {
 
             },
             currencies = Currency.values().asList(),
-            Rate(),
+            Rate.defaultRate(),
             "",
             {
 
@@ -380,14 +380,14 @@ fun CurrencyConverterBackGround() {
                     RoundedCornerShape(
                         topStartPercent = 0,
                         topEndPercent = 0,
-                        bottomEndPercent = 20,
-                        bottomStartPercent = 20
+                        bottomEndPercent = 5,
+                        bottomStartPercent = 5
                     )
                 )
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            primaryColor, primaryColor.copy(alpha = 0.3f)
+                            primaryColor, primaryColor.copy(alpha = 0.0f)
                         )
                     )
                 )

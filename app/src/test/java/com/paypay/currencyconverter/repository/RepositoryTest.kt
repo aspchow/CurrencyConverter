@@ -13,6 +13,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
@@ -26,8 +27,8 @@ class RepositoryTest {
     private val remoteDataSource: RemoteDataSource = mockk()
     private val apiRefreshChecker: ApiRefreshChecker = mockk()
     private val rateFlowFromLocalDataSource: Flow<Rate> = mockk()
-    private val lmtFlowFromLocalDataSource: Flow<Long> = flow { emit(lmtValue) }
     private val lmtValue: Long = 1L
+    private val lmtFlowFromLocalDataSource: Flow<Long> = flowOf(lmtValue)
     private val apiResponse: Response<CurrencyRate> = mockk()
     private val currencyRate: CurrencyRate = mockk()
     private val rate: Rate = mockk()

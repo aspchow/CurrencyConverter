@@ -22,36 +22,47 @@ class DataStore @Inject constructor(
 ) {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "currency_rates")
 
+    private val dataStore = context.dataStore
+
     private val RATE_KEY = stringPreferencesKey("RATE_KEY")
 
     private val RATE_LAST_MODIFIED_KEY = longPreferencesKey("RATE_LMT")
 
 
-    fun getRate(): Flow<Rate> = getValue(RATE_KEY, "").map { rateEncode ->
-        if (rateEncode.isEmpty()) Rate()
+    companion object {
+        const val RATE_LAST_MODIFIED_DEFAULT_VALUE = -1L
+        val RATE_DEFAULT_VALUE = Rate.defaultRate()
+    }
+
+
+    fun getRate(): Flow<Rate> = dataStore.getValue(RATE_KEY, "").map { rateEncode ->
+        if (rateEncode.isEmpty()) Rate.defaultRate()
         else gson.fromJson(rateEncode, Rate::class.java)
     }
 
     suspend fun saveRate(rate: Rate) {
-        saveValue(RATE_KEY, gson.toJson(rate))
+        dataStore.saveValue(RATE_KEY, gson.toJson(rate))
         saveLmtOfRate(System.currentTimeMillis())
     }
 
-    fun getLmtOFRate(): Flow<Long> = getValue(RATE_LAST_MODIFIED_KEY, -1)
+    fun getLmtOFRate(): Flow<Long> =
+        dataStore.getValue(RATE_LAST_MODIFIED_KEY, RATE_LAST_MODIFIED_DEFAULT_VALUE)
 
     private suspend fun saveLmtOfRate(lmt: Long) {
-        saveValue(RATE_LAST_MODIFIED_KEY, lmt)
+        dataStore.saveValue(RATE_LAST_MODIFIED_KEY, lmt)
     }
 
-    private suspend fun <T> saveValue(key: Preferences.Key<T>, value: T) {
-        context.dataStore.edit { settings ->
-            settings[key] = value
-        }
-    }
-
-    private fun <T> getValue(key: Preferences.Key<T>, defaultValue: T): Flow<T> =
-        context.dataStore.data.map { preference ->
-            preference[key] ?: defaultValue
-        }
 
 }
+
+
+suspend fun <T> DataStore<Preferences>.saveValue(key: Preferences.Key<T>, value: T) =
+    edit { settings ->
+        settings[key] = value
+    }
+
+
+fun <T> DataStore<Preferences>.getValue(key: Preferences.Key<T>, defaultValue: T): Flow<T> =
+    data.map { preference ->
+        preference[key] ?: defaultValue
+    }

@@ -1,6 +1,6 @@
 package com.paypay.currencyconverter.repository.model
 
-class Rate {
+class Rate private constructor(){
     val AED: Double = 0.0
     val AFN: Double = 0.0
     val ALL: Double = 0.0
@@ -342,6 +342,16 @@ class Rate {
             Currency.ZAR -> ZAR
             Currency.ZMW -> ZMW
             Currency.ZWL -> ZWL
+        }
+    }
+
+    companion object{
+        private var instance : Rate? = null
+        fun defaultRate() : Rate{
+            if(instance == null) {
+                instance = Rate()
+            }
+            return instance!!
         }
     }
 }
